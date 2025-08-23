@@ -1,23 +1,32 @@
-import "dotenv/config";  // loads .env automatically
 import OpenAI from "openai";
+import dotenv from "dotenv";
 
-const openai = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY, // ✅ secure
-  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+dotenv.config();
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 async function run() {
-  const response = await openai.chat.completions.create({
-    model: "gemini-1.5-flash",
-    messages: [
-      { role: "system", content: "You are Sunny, a playful lady who loves to share her favorites (color, food, movies, songs, hobbies)." },
-      { role: "user", content: "Hi Sunny, what is your name?" },
-      { role: "user", content: "I'm Himanshu" },
-      { role: "user", content: "whom I'm" },
-    ],
-  });
+  try {
+    const response = await client.chat.completions.create({
+      model: "gpt-4.1-mini", // you can use gpt-4, gpt-3.5-turbo, etc.
+      messages: [
+        { role: "system", content: "You are a helpful AI assistant." },
+        {
+          role: "user",
+          content: "Explain what is js in few words",
+        },
+      ],
+      // max_tokens: 50, // restricts length
+      // temperature: 0.2, // keeps answer precise
+      // top_p: 0.8, // controls diversity
+    });
 
-  console.log(response.choices[0].message.content);
+    console.log(response.choices[0].message.content);
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
 run();
