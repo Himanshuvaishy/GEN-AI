@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Processing Flow Demo</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container { 
+            background: rgba(255,255,255,0.1); 
+            padding: 30px; 
+            border-radius: 20px; 
+            backdrop-filter: blur(15px);
+            margin-bottom: 20px;
+        }
+        .step {
+            background: rgba(255,255,255,0.15);
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #4CAF50;
+            position: relative;
+        }
+        .step-number {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            position: absolute;
+            left: -20px;
+            top: 20px;
+        }
+        .token-visual {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .token {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .embedding-visual {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 5px;
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .embedding-value {
+            background: rgba(255,255,255,0.3);
+            padding: 8px;
+            text-align: center;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .position-visual {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            gap: 10px;
+        }
+        .plus-sign {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            margin: 10px 0;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .flow-arrow {
+            text-align: center;
+            font-size: 24px;
+            color: #FFD700;
+            margin: 10px 0;
+        }
+        .final-output {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .code-block {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 How Input Processing Works in Transformers</h1>
+        <p>Enter a prompt to see exactly how it gets processed step by step:</p>
+        
+        <input type="text" id="userPrompt" placeholder="Enter your prompt here..." value="I love learning AI">
+        <button onclick="processInput()">Process Input</button>
+        
+        <div id="processingSteps"></div>
+    </div>
+
+    <script>
+        // Mock tokenizer (simplified version)
+        function tokenize(text) {
+            // Simple word-based tokenization (real tokenizers are more complex)
+            return text.toLowerCase()
+                      .replace(/[^\w\s]/g, '')
+                      .split(/\s+/)
+                      .filter(word => word.length > 0);
+        }
+
+        // Mock vocabulary mapping
+        const vocab = {
+            'i': 1, 'love': 2, 'learning': 3, 'ai': 4, 'the': 5, 'cat': 6, 
+            'sits': 7, 'on': 8, 'mat': 9, 'hello': 10, 'world': 11,
+            'transformer': 12, 'model': 13, 'is': 14, 'amazing': 15,
+            '[UNK]': 0  // Unknown token
+        };
+
+        function getTokenIds(tokens) {
+            return tokens.map(token => vocab[token] || vocab['[UNK]']);
+        }
+
+        // Mock embedding generation (real embeddings are learned)
+        function generateMockEmbedding(tokenId, dimensions = 8) {
+            const embedding = [];
+            // Use token ID as seed for consistent embeddings
+            Math.seedrandom = function(seed) {
+                const m = 0x80000000;
+                let a = 1103515245;
+                let c = 12345;
+                let state = seed ? seed : Math.floor(Math.random() * (m - 1));
+                
+                return function() {
+                    state = (a * state + c) % m;
+                    return state / (m - 1);
+                };
+            };
+            
+            const rng = Math.seedrandom(tokenId * 12345);
+            
+            for (let i = 0; i < dimensions; i++) {
+                embedding.push((rng() - 0.5) * 2); // Range: -1 to 1
+            }
+            return embedding;
+        }
+
+        // Generate positional encodings
+        function generatePositionalEncoding(position, dimensions = 8) {
+            const encoding = [];
+            for (let i = 0; i < dimensions; i++) {
+                if (i % 2 === 0) {
+                    // Sine for even indices
+                    encoding[i] = Math.sin(position / Math.pow(10000, (2 * i) / dimensions));
+                } else {
+                    // Cosine for odd indices
+                    encoding[i] = Math.cos(position / Math.pow(10000, (2 * (i - 1)) / dimensions));
+                }
+            }
+            return encoding;
+        }
+
+        // Add two vectors
+        function addVectors(vec1, vec2) {
+            return vec1.map((val, i) => val + vec2[i]);
+        }
+
+        function processInput() {
+            const prompt = document.getElementById('userPrompt').value;
+            if (!prompt.trim()) return;
+
+            let html = '';
+
+            // Step 1: Tokenization
+            html += `
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h2>Step 1: Tokenization</h2>
+                    <p><strong>Input:</strong> "${prompt}"</p>
+                    <p>The model breaks your text into smaller units called <strong>tokens</strong>.</p>
+            `;
+
+            const tokens = tokenize(prompt);
+            html += '<div class="token-visual">';
+            tokens.forEach(token => {
+                html += `<div class="token">${token}</div>`;
+            });
+            html += '</div>';
+
+            html += `<p><strong>Tokens:</strong> [${tokens.map(t => `"${t}"`).join(', ')}]</p></div>`;
+
+            // Step 2: Token IDs
+            html += `
+                <div class="flow-arrow">⬇️</div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h2>Step 2: Convert to Token IDs</h2>
+                    <p>Each token is mapped to a unique number from the model's vocabulary.</p>
+            `;
+
+            const tokenIds = getTokenIds(tokens);
+            html += '<div class="code-block">';
+            tokens.forEach((token, i) => {
+                html += `"${token}" → ${tokenIds[i]}<br>`;
+            });
+            html += '</div>';
+
+            html += `<p><strong>Token IDs:</strong> [${tokenIds.join(', ')}]</p></div>`;
+
+            // Step 3: Input Embeddings
+            html += `
+                <div class="flow-arrow">⬇️</div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h2>Step 3: Input Embeddings</h2>
+                    <p>Each token ID is converted to a high-dimensional vector that captures semantic meaning.</p>
+            `;
+
+            const inputEmbeddings = tokenIds.map(id => generateMockEmbedding(id));
+            
+            html += '<p><strong>Token Embeddings (8D simplified):</strong></p>';
+            html += '<div class="embedding-visual">';
+            inputEmbeddings.forEach((embedding, i) => {
+                html += `<div style="border: 2px solid #FF6B6B; padding: 10px; border-radius: 8px;">
+                    <strong>"${tokens[i]}"</strong><br>
+                    [${embedding.map(x => x.toFixed(2)).join(', ')}]
+                </div>`;
+            });
+            html += '</div></div>';
+
+            // Step 4: Positional Encoding
+            html += `
+                <div class="flow-arrow">⬇️</div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h2>Step 4: Positional Encoding</h2>
+                    <p>Since Transformers don't process sequentially, we add position information to each embedding.</p>
+            `;
+
+            const positionalEncodings = tokens.map((_, i) => generatePositionalEncoding(i));
+            
+            html += '<p><strong>Positional Encodings:</strong></p>';
+            html += '<div class="embedding-visual">';
+            positionalEncodings.forEach((encoding, i) => {
+                html += `<div style="border: 2px solid #4ECDC4; padding: 10px; border-radius: 8px;">
+                    <strong>Pos ${i}</strong><br>
+                    [${encoding.map(x => x.toFixed(2)).join(', ')}]
+                </div>`;
+            });
+            html += '</div></div>';
+
+            // Step 5: Final Input
+            html += `
+                <div class="flow-arrow">⬇️</div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h2>Step 5: Final Input to Transformer</h2>
+                    <p>Token embeddings + Positional encodings = Final input vectors</p>
+            `;
+
+            const finalInputs = inputEmbeddings.map((embedding, i) => 
+                addVectors(embedding, positionalEncodings[i])
+            );
+
+            html += '<div class="position-visual">';
+            finalInputs.forEach((finalInput, i) => {
+                html += `
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin: 5px;">
+                        <strong>"${tokens[i]}"</strong><br>
+                        <small>Token Emb:</small><br>
+                        [${inputEmbeddings[i].map(x => x.toFixed(1)).join(', ')}]<br>
+                        <div class="plus-sign">+</div>
+                        <small>Pos Enc:</small><br>
+                        [${positionalEncodings[i].map(x => x.toFixed(1)).join(', ')}]<br>
+                        <div style="color: #FFD700; font-weight: bold;">= Final Input:</div>
+                        [${finalInput.map(x => x.toFixed(1)).join(', ')}]
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+
+            // Final Summary
+            html += `
+                <div class="flow-arrow">⬇️</div>
+                <div class="final-output">
+                    <h2>✅ Ready for Transformer Layers!</h2>
+                    <p><strong>Your prompt:</strong> "${prompt}"</p>
+                    <p><strong>Has been converted to:</strong> ${tokens.length} vectors of ${inputEmbeddings[0].length} dimensions each</p>
+                    <p><strong>Next:</strong> These vectors will flow through multiple transformer layers (attention, feed-forward, normalization) to generate the response!</p>
+                </div>
+            `;
+
+            // Technical summary
+            html += `
+                <div class="step">
+                    <h2>🔧 Technical Summary</h2>
+                    <div class="code-block">
+// Complete Flow Summary:
+Input: "${prompt}"
+↓
+Tokens: [${tokens.map(t => `"${t}"`).join(', ')}]
+↓  
+Token IDs: [${tokenIds.join(', ')}]
+↓
+Input Embeddings: ${tokens.length} vectors × ${inputEmbeddings[0].length}D
+↓
++ Positional Encodings: ${tokens.length} vectors × ${positionalEncodings[0].length}D  
+↓
+Final Input: ${tokens.length} vectors × ${finalInputs[0].length}D
+↓
+Transformer Layers (Attention, Feed-Forward, etc.)
+↓
+Output Tokens → Generated Text
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('processingSteps').innerHTML = html;
+        }
+
+        // Process initial example
+        processInput();
+    </script>
+</body>
+</html>
