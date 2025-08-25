@@ -1,89 +1,78 @@
-```js
-ChatML Prompt Style
+````js 
+**ChatML Prompting Notes**
 
-ChatML (Chat Markup Language) is a structured format for defining conversational prompts for generative AI models. It is mainly used to encode multi-turn dialogues, providing clear boundaries for system, user, and assistant messages.
+ChatML structures conversations with role-tagged messages so models know who is speaking and how to respond. The core roles are: system, user, assistant, and tool. They should alternate like a dialogue.
 
-Structure
-Each message in ChatML is wrapped between special boundary tokens:
+What it is
+ChatML is a simple message list with roles and content that guides a chat model’s behavior.
 
-text
-<|im_start|>role
-message content
-<|im_end|>
-role: Identifies the message type and should be system, user, assistant, or (less frequently) tool.
+Order matters: after optional system messages, roles should alternate user → assistant → user → assistant.
 
-Multiple messages are concatenated to create a complete chat prompt.
+Keeps prompts clean, predictable, and easy to debug.
 
-Example
-Basic Example:
-
-text
-<|im_start|>system
-Assistant is a large language model trained by OpenAI.
-<|im_end|>
-<|im_start|>user
-Who were the founders of Microsoft?
-<|im_end|>
-<|im_start|>assistant
-
-<|im_end|>
-With Instructions:
-
-text
-<|im_start|>system
-Assistant is an intelligent chatbot designed to help users answer their tax related questions.
-
-Instructions:
-- Only answer questions related to taxes.
-- If you're unsure of an answer, say "I don't know" and recommend visiting the IRS website.
-<|im_end|>
-<|im_start|>user
-When are my taxes due?
-<|im_end|>
-<|im_start|>assistant
-
-<|im_end|>
 Roles
-system: Sets up context, constraints, or instructions.
+System
+Purpose: Global rules, persona, tone, safety, and output format.
 
-user: Represents messages from the user.
+Guidance: Keep concise and unambiguous; front-load the most important constraints.
 
-assistant: The model’s replies.
+Example:
 
-tool: Optional, for tool outputs (rarely used unless supported).
+“You are a helpful assistant. Answer briefly. Output only the final answer.”
 
-Key Principles
-Each message is bounded by <|im_start|>role and <|im_end|>.
+User
+Purpose: Human request, question, or task description.
 
-Message order matters: The system message should come first, followed by the conversation turns.
+Guidance: State the task and desired format; include minimal context.
 
-Use plain text between the tokens; avoid adding extra markup inside the message body.
+Example:
 
-Usage in Code (JavaScript Example)
-javascript
-const chatml = [
-  "<|im_start|>system",
-  "You are a helpful AI assistant.",
-  "<|im_end|>",
-  "<|im_start|>user",
-  "Explain the concept of ChatML.",
-  "<|im_end|>",
-  "<|im_start|>assistant",
-  // Model response goes here
-  "<|im_end|>"
-].join('\n');
-Benefits
-Clarity: Boundaries prevent role confusion in multi-turn chat prompts.
+“Explain recursion in one sentence.”
 
-Flexibility: Easily add as many turns as needed.
+Assistant
+Purpose: Model’s reply to the latest user turn, following the system rules.
 
-Compatibility: Used in OpenAI and compatible frameworks.
+Guidance: Direct, structured, and aligned with requested format.
 
-Best Practices
-Always start with a system message for context.
+Example:
 
-Alternate clearly between user and assistant.
+“Recursion is when a function solves a problem by calling a smaller version of itself.”
 
-For complex instructions, enumerate them as bullet points inside the system message.
+Tool
+Purpose: When the assistant calls a function/API, the tool role carries the tool’s raw result back to the model.
 
-Leave the assistant’s reply blank if you want the model to generate the next response.
+Guidance: Use machine-readable, factual outputs only (no narrative).
+
+Example content:
+
+JSON string or plain text returned by a calculator, search, or database.
+
+Alternation Rules
+Valid sequence:
+
+[system?], user, assistant, user, assistant, …
+
+Avoid consecutive same-role turns (e.g., user followed by user) without an assistant turn in between.
+
+Treat each assistant reply as the model’s turn that closes the current user turn.
+
+Analogy
+Think of a play: system = director’s notes, user = audience prompt, assistant = actor’s line, tool = stagehand delivering a prop.
+
+Key Takeaways
+System sets behavior; user asks; assistant answers; tool returns data.
+
+Messages must alternate after system; this prevents 400 errors for invalid dialogue order.
+
+Keep system rules short and specific to get predictable outputs.
+
+Put strict formatting requirements in system to control verbosity.
+
+Tiny JavaScript Example (≤20 lines)
+js
+const messages = [
+  { role: "system", content: "Answer briefly. Output only the final answer." },
+  { role: "user", content: "2 + 2?" }
+];
+// Send messages to a Chat Completions API
+// Read the result from choices[0].message.content

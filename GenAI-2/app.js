@@ -2,31 +2,32 @@ import OpenAI from "openai";
 import dotenv from "dotenv";
 
 dotenv.config();
+//console.log(process.env.PERPLEXITY_API_KEY);
 
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.PERPLEXITY_API_KEY,
+  baseURL: "https://api.perplexity.ai",
 });
 
-async function run() {
-  try {
-    const response = await client.chat.completions.create({
-      model: "gpt-4.1-mini", // you can use gpt-4, gpt-3.5-turbo, etc.
-      messages: [
-        { role: "system", content: "You are a helpful AI assistant." },
-        {
-          role: "user",
-          content: "Explain what is js in few words",
-        },
-      ],
-      // max_tokens: 50, // restricts length
-      // temperature: 0.2, // keeps answer precise
-      // top_p: 0.8, // controls diversity
-    });
+const resp = await client.chat.completions.create({
+  model: "sonar",
+  messages: [
+    {
+      role: "system",
+      content: "You are a helpful assistant and Return only the exact answer. No explanations or citations.",
+    },
+    { role: "user", content: "I am Himanshu vaishy a software developer." },
+    {
+      role: "assistant",
+      content:
+        "You introduced yourself as **Himanshu Vaishy, software developer**.",
+    },
+    { role: "user", content: "What is recursion" },
+  ],
+  search_disabled: true,
+  max_tokens: 80, // cap output tokens
+  temperature: 0.3, // lower randomness often uses fewer tokens
+});
+console.log(resp.choices[0].message.content);
 
-    console.log(response.choices[0].message.content);
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
 
-run();
