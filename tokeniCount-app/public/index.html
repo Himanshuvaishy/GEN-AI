@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remote Token Counter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f4f9;
+      color: #333;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h2>Remote Token Counter</h2>
+  <textarea id="inputText" placeholder="Type your text here..."></textarea><br>
+  <button onclick="countTokens()">Count Tokens</button>
+  <div class="result" id="result"></div>
+
+  <script>
+    async function countTokens() {
+      const text = document.getElementById("inputText").value;
+      if (!text.trim()) {
+        alert("Please enter some text.");
+        return;
+      }
+
+     
+      
+
+      try {
+        document.getElementById("result").innerHTML = "Counting tokens... ⏳";
+        const res = await fetch("/api/count-remote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text })
+        });
+        //document.getElementById("result").innerHTML = "Counting tokens... ⏳";
+
+        const data = await res.json();
+        if (data.error) {
+          document.getElementById("result").innerHTML = `<b>Error:</b> ${data.error}`;
+        } else {
+          document.getElementById("result").innerHTML = `
+            <b>Method:</b> ${data.method}<br>
+            <b>Prompt Tokens:</b> ${data.usage.prompt_tokens}<br>
+            <b>Completion Tokens:</b> ${data.usage.completion_tokens}<br>
+            <b>Total Tokens:</b> ${data.usage.total_tokens}
+          `;
+        }
+      } catch (err) {
+        document.getElementById("result").innerHTML = `<b>Error:</b> ${err.message}`;
+      }
+    }
+    
+       
+  </script>
+</body>
