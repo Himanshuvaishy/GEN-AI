@@ -155,6 +155,7 @@ Different models are trained with different tokenizers, which means:
   3. The model then predicts the next token step by step.
 
 ---
+```java
 
 ## 🔹 Example
 Sentence: `"I love pizza 🍕"`
@@ -175,3 +176,64 @@ Edit
 
 ---
 👉 So yes, prompt splitting (tokenization) depends on the model’s tokenizer.
+
+🔹 What is a Model’s Tokenizer?
+
+A tokenizer is like a translator that breaks down text into smaller pieces (called tokens) before giving it to a model like me (GPT).
+
+The model doesn’t understand raw text (words/sentences) directly — it only works with numbers.
+So, the tokenizer’s job is to:
+
+Split text into tokens (words, subwords, or even characters).
+
+Map tokens to numbers (IDs) using a vocabulary.
+
+Send those IDs to the model for processing.
+
+🔹 Example
+
+Text:
+
+I love coding!
+
+
+Tokenizer might break it like this (depends on model type):
+
+"I" → token 100
+
+" love" → token 567
+
+" coding" → token 9823
+
+"!" → token 21
+
+So internally the model sees:
+
+[100, 567, 9823, 21]
+
+🔹 Why Tokenization?
+
+It makes huge vocabulary manageable.
+
+Helps handle rare words (e.g., “Himanshuvaishy” might be split into smaller subwords: “Him”, “anshu”, “vaishy”).
+
+Ensures consistency across training and inference.
+
+🔹 Types of Tokenizers
+
+Word-level → splits text by spaces (not used much now, because vocabulary explodes).
+
+"I love coding" → ["I", "love", "coding"]
+
+Character-level → each character is a token.
+
+"coding" → ["c", "o", "d", "i", "n", "g"]
+
+Subword-level (most common) → break into meaningful chunks.
+
+"unbelievable" → ["un", "believ", "able"]
+
+Modern models like GPT, BERT, LLaMA use subword tokenizers (Byte-Pair Encoding, WordPiece, SentencePiece).
+
+👉 In short:
+A model’s tokenizer is the first step in the pipeline that converts human-readable text into tokens (numbers) the model can actually process.

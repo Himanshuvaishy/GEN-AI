@@ -85,5 +85,3 @@ Imagine you're texting a friend:
 
 ------------------------------------------------------------------------
 
-🌟 Next Step: We can explore **how to use GPT in JavaScript** and build
-cool projects with it!

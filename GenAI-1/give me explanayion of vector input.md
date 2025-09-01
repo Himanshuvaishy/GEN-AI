@@ -1,4 +1,5 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" style="height:64px;margin-right:32px"/>
+[]: # Title: give me explanayion of vector input
+[]: # Description: Explanation of vector input in programming, mathematics, and machine learning contexts.
 
 # give me explanayion of vector input
 
@@ -32,27 +33,3 @@ In machine learning, vector inputs are **numerical representations of data fed i
 A **vector-valued function** takes one or more variables as input and produces a multidimensional vector as output. The input itself can be either scalar or vector, and there's no required relationship between the input and output dimensions.[^1_7]
 
 Vector inputs are essential for representing complex, multi-dimensional data efficiently across numerous computational and mathematical applications.
-<span style="display:none">[^1_10][^1_5]</span>
-
-<div style="text-align: center">⁂</div>
-
-[^1_1]: https://www.geeksforgeeks.org/cpp/vector-in-cpp-stl/
-
-[^1_2]: https://library.fiveable.me/key-terms/electrical-circuits-systems-ii/input-vector
-
-[^1_3]: https://www.w3schools.com/cpp/cpp_vectors.asp
-
-[^1_4]: https://stackoverflow.com/questions/64512567/is-there-a-way-to-take-input-from-user-in-vector-in-c
-
-[^1_5]: https://www.geeksforgeeks.org/cpp/vector-of-vectors-in-c-stl-with-examples/
-
-[^1_6]: https://www.youtube.com/watch?v=18r4P6UNSYk
-
-[^1_7]: https://en.wikipedia.org/wiki/Vector-valued_function
-
-[^1_8]: https://www.fastsimon.com/ecommerce-wiki/optimized-ecommerce-experience/vectors-and-machine-learning/
-
-[^1_9]: https://www.sciencedirect.com/topics/engineering/system-input-vector
-
-[^1_10]: https://forums.unrealengine.com/t/help-understanding-input-vectors/2121209
-
