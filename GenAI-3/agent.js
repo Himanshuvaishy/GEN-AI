@@ -101,7 +101,7 @@ async function main() {
     {
       role: 'user',
       content:
-        'In the current directly, read the changes via git and push the changes to github with good commit message',
+        'give me follower of my github profile HimanshuVaishy and also tell me the current weather of Patiala',
     },
   ];
 
