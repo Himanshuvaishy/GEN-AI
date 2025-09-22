@@ -2,7 +2,7 @@
 
 ## 🔹 What is RAG?
 
-**RAG = Retrieval + Generation**\
+**RAG = Retrieval + Generation**
 It is a method that combines two parts: 1. **Retrieval** -- fetching
 relevant information from an external knowledge source (like a database,
 documents, or API).\
